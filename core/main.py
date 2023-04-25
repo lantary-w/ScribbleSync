@@ -26,11 +26,13 @@ def read_config():
 
 
 @click.command()
-@click.option('--file', '-f', help='The file you want to post.')
+@click.option('--file', '-f', help='The file you want to post.', default='F:\\Projcet\\python\\自动发布文章\\test\\test.md')
 def main(file):
     config = read_config()
-    jianshu = JianShu(file=file, config=config)
-    jianshu.write_blog()
+
+    if config['jianshu']['enable']:
+        jianshu = JianShu(file=file, config=config)
+        jianshu.write_blog()
 
 
 if __name__ == '__main__':
