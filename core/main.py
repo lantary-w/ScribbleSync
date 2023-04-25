@@ -4,8 +4,13 @@
 # @Blog    : https://lantary.cn
 
 import os
+import sys
 import yaml
 import click
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
+
 from core.JianShu import JianShu
 
 
@@ -22,10 +27,10 @@ def read_config():
 
 @click.command()
 @click.option('--file', '-f', help='The file you want to post.')
-def main(m_file):
+def main(file):
     config = read_config()
-    test = JianShu(file=m_file, config=config)
-    test.write_blog()
+    jianshu = JianShu(file=file, config=config)
+    jianshu.write_blog()
 
 
 if __name__ == '__main__':
