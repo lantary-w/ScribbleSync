@@ -2,10 +2,11 @@
 # @Author  : lantary
 # @Email   : lantary-w@qq.com
 # @Blog    : https://lantary.cn
+
 import os
 import re
 import time
-import yaml
+import datetime
 from selenium import webdriver
 from selenium.webdriver import Keys
 from selenium.webdriver.chrome.options import Options
@@ -43,48 +44,60 @@ class JianShu:
         driver.quit()
 
     def write_blog(self):
+        print('====正在上传到简书====')
+
         if os.path.exists(self.cookie):
-            wb_cookie = open(self.cookie, 'r').read()
-            wb_md_context = open(self.md_file, 'r', encoding='utf-8').read()
-            chrome_options = Options()
-            chrome_options.page_load_strategy = 'eager'
-            driver = webdriver.Chrome(options=chrome_options)
 
-            driver.get('https://www.jianshu.com/')
-            time.sleep(0.5)
-            # cookie转为字典格式，方便driver读取
-            wb_cookie_dict = {i.split("=")[0]: i.split("=")[1] for i in wb_cookie.split(";")}
-            for key, value in wb_cookie_dict.items():
-                driver.add_cookie({'name': key, 'value': value})
+            cookie_time = datetime.datetime.fromtimestamp(os.path.getmtime(self.cookie))
+            d_time = datetime.datetime.now() - cookie_time
 
-            driver.get(url='https://www.jianshu.com/writer#/')
-            time.sleep(0.5)
-            driver.find_element(by=By.CLASS_NAME, value="_1GsW5").click()
-            time.sleep(1)
-            for line in wb_md_context.splitlines():
-                # 对line进行正则匹配，检查是否含有图片
-                pirtures = re.findall(r'!\[(.*?)]\((.*?)\)', line)
-                if not pirtures:
-                    driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line)
-                    driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, '\n')
-                else:
-                    # 以图片格式为间隔构造list
-                    line_list = re.split(r'!\[.*?]\(.*?\)', line)
-                    for line_index, line_part in enumerate(line_list):
-                        if line_index == len(line_list) - 1:
-                            driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line_part)
-                            driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, '\n')
-                        else:
-                            pirture = os.path.join(os.path.dirname(self.md_file), pirtures[line_index][1])
-                            pirture_name = pirtures[line_index][0]
+            # 判断cookie是否过时
+            if d_time < datetime.timedelta(hours=self.config['jianshu']['cookie_valid_time']):
+                wb_cookie = open(self.cookie, 'r').read()
+                wb_md_context = open(self.md_file, 'r', encoding='utf-8').read()
+                chrome_options = Options()
+                chrome_options.page_load_strategy = 'eager'
+                driver = webdriver.Chrome(options=chrome_options)
 
-                            # 写入到简书
-                            driver.find_element(by=By.CLASS_NAME, value='_2zLpt').click()
-                            driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line_part)
-                            driver.find_element(by=By.ID, value='kalamu-upload-image').send_keys(pirture)
-                            time.sleep(2)
-                            driver.find_element(by=By.ID, value='arthur-editor').send_keys(pirture_name)
-                            print('图片: ' + pirture_name + ' 已上传')
+                driver.get('https://www.jianshu.com/')
+                time.sleep(0.5)
+                # cookie转为字典格式，方便driver读取
+                wb_cookie_dict = {i.split("=")[0]: i.split("=")[1] for i in wb_cookie.split(";")}
+                for key, value in wb_cookie_dict.items():
+                    driver.add_cookie({'name': key, 'value': value})
+
+                driver.get(url='https://www.jianshu.com/writer#/')
+                time.sleep(0.5)
+                driver.find_element(by=By.CLASS_NAME, value="_1GsW5").click()
+                time.sleep(1)
+                for line in wb_md_context.splitlines():
+                    # 对line进行正则匹配，检查是否含有图片
+                    pirtures = re.findall(r'!\[(.*?)]\((.*?)\)', line)
+                    if not pirtures:
+                        driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line)
+                        driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, '\n')
+                    else:
+                        # 以图片格式为间隔构造list
+                        line_list = re.split(r'!\[.*?]\(.*?\)', line)
+                        for line_index, line_part in enumerate(line_list):
+                            if line_index == len(line_list) - 1:
+                                driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line_part)
+                                driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, '\n')
+                            else:
+                                pirture = os.path.join(os.path.dirname(self.md_file), pirtures[line_index][1])
+                                pirture_name = pirtures[line_index][0]
+
+                                # 写入到简书
+                                driver.find_element(by=By.CLASS_NAME, value='_2zLpt').click()
+                                driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line_part)
+                                driver.find_element(by=By.ID, value='kalamu-upload-image').send_keys(pirture)
+                                time.sleep(2)
+                                driver.find_element(by=By.ID, value='arthur-editor').send_keys(pirture_name)
+                                print('图片: ' + pirture_name + ' 已上传')
+            else:
+                self.login()
+                time.sleep(1)
+                self.write_blog()
 
         else:
             self.login()
