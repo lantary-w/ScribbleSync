@@ -13,10 +13,19 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
 
+def cheack_element(ce_driver, ce_element):
+    while True:
+        try:
+            element = ce_driver.find_element(by=By.CLASS_NAME, value=ce_element)
+            time.sleep(1)
+        except:
+            return True
+
+
 class JianShu:
     def __init__(self, file, config):
-        self.account = config['jianshu']['useraccount']
-        self.password = config['jianshu']['userpassword']
+        self.account = config['jianshu']['login']['useraccount']
+        self.password = config['jianshu']['login']['userpassword']
         self.cookie = config['jianshu']['cookie_path']
         self.config = config
         self.md_file = file
@@ -27,24 +36,37 @@ class JianShu:
         driver.get(url)
         time.sleep(0.5)
 
-        # 输入账号密码
-        driver.find_element(by=By.ID, value="session_email_or_mobile_number").send_keys(self.account)
-        driver.find_element(by=By.ID, value="session_password").send_keys(self.password)
-        time.sleep(0.5)
+        if self.config['jianshu']['login']['login_mode'] == 'auto':
+            print('正在登录简书, 登录模式为自动登录, 但需要手动输入验证码')
+            # 输入账号密码
+            driver.find_element(by=By.ID, value="session_email_or_mobile_number").send_keys(self.account)
+            driver.find_element(by=By.ID, value="session_password").send_keys(self.password)
+            time.sleep(0.5)
 
-        # 点击登录按钮，等待用户输入验证码
-        driver.find_element(by=By.ID, value="sign-in-form-submit-btn").click()
-        time.sleep(self.config['jianshu']['vf_wait_time'])
+            # 点击登录按钮，等待用户输入验证码
+            driver.find_element(by=By.ID, value="sign-in-form-submit-btn").click()
+            time.sleep(self.config['jianshu']['vf_wait_time'])
 
-        # 保存cookies
-        cookies = driver.get_cookies()
-        cookie = ";".join([item["name"] + "=" + item["value"] + "" for item in cookies])
-        with open(self.cookie, 'w') as cookie_f:
-            cookie_f.write(str(cookie))
-        driver.quit()
+            # 保存cookies
+            cookies = driver.get_cookies()
+            cookie = ";".join([item["name"] + "=" + item["value"] + "" for item in cookies])
+            with open(self.cookie, 'w') as cookie_f:
+                cookie_f.write(str(cookie))
+            driver.quit()
+
+        elif self.config['jianshu']['login']['login_mode'] == 'manual':
+            print('正在登录简书, 登录模式为手动登录, 请手动输入账号密码')
+            # 等待用户输入账号密码
+
+            if cheack_element(driver, 'sign-in-button'):
+                # 保存cookies
+                cookies = driver.get_cookies()
+                cookie = ";".join([item["name"] + "=" + item["value"] + "" for item in cookies])
+                with open(self.cookie, 'w') as cookie_f:
+                    cookie_f.write(str(cookie))
+                driver.quit()
 
     def write_blog(self):
-        print('====正在上传到简书====')
 
         if os.path.exists(self.cookie):
 
@@ -53,6 +75,8 @@ class JianShu:
 
             # 判断cookie是否过时
             if d_time < datetime.timedelta(hours=self.config['jianshu']['cookie_valid_time']):
+                print('====正在上传到简书====')
+
                 wb_cookie = open(self.cookie, 'r').read()
                 wb_md_context = open(self.md_file, 'r', encoding='utf-8').read()
                 chrome_options = Options()
