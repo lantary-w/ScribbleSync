@@ -7,4 +7,5 @@ jianshu:
   vf_wait_time: 5                     # 输入验证码的时间
   cookie_path: conf/cookie.txt        # cookie文件路径
   cookie_valid_time: 24               # cookie有效时间，单位是小时
+  upload_wait_time: 3                 # 等待图片上传的时间，过短可能会出问题
 
