@@ -34,8 +34,8 @@ pip install -r requirements.txt
 ```yaml
 # 通过下面的配置开启手动登录模式，auto开启自动登录
 jianshu:
-	login:
-		login_mode: manual
+  login:
+    login_mode: manual
 ```
 
 3. 运行程序：

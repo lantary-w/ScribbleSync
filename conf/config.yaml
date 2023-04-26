@@ -1,0 +1,10 @@
+jianshu:
+  enable: true                        # 是否启用
+  login:
+    login_mode: manual                # 登录模式，auto自动登录，manual手动登录
+    useraccount: 12345678945          # manual模式下不需要填
+    userpassword: 1234567894          # manual模式下不需要填
+  vf_wait_time: 5                     # 输入验证码的时间
+  cookie_path: conf/cookie.txt        # cookie文件路径
+  cookie_valid_time: 24               # cookie有效时间，单位是小时
+
