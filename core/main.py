@@ -26,7 +26,7 @@ def read_config():
 
 
 @click.command()
-@click.option('--file', '-f', help='The file you want to post.', default='F:\\Projcet\\python\\自动发布文章\\test\\test.md')
+@click.option('--file', '-f', help='The file you want to post.', default='F:\\Projcet\\自主项目\\ScribbleSync\\test\\test.md')
 def main(file):
     config = read_config()
 
