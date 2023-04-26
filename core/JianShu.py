@@ -96,13 +96,13 @@ class JianShu:
                 time.sleep(1)
                 for line in wb_md_context.splitlines():
                     # 对line进行正则匹配，检查是否含有图片
-                    pirtures = re.findall(r'!\[(.*?)]\((.*?)\)', line)
+                    pirtures = re.findall(r'!\[(.*?)]\(((.*?)\.(png|bmp|jpg|gif|tif|jpeg))\)', line)
                     if not pirtures:
                         driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line)
                         driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, '\n')
                     else:
                         # 以图片格式为间隔构造list
-                        line_list = re.split(r'!\[.*?]\(.*?\)', line)
+                        line_list = re.split(r'!\[.*?]\(.*?\.(?:png|bmp|jpg|gif|tif|jpeg)\)', line)
                         for line_index, line_part in enumerate(line_list):
                             if line_index == len(line_list) - 1:
                                 driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line_part)
@@ -115,7 +115,7 @@ class JianShu:
                                 driver.find_element(by=By.CLASS_NAME, value='_2zLpt').click()
                                 driver.find_element(by=By.ID, value="arthur-editor").send_keys(Keys.PAGE_DOWN, line_part)
                                 driver.find_element(by=By.ID, value='kalamu-upload-image').send_keys(pirture)
-                                time.sleep(2)
+                                time.sleep(self.config['jianshu']['upload_wait_time'])
                                 driver.find_element(by=By.ID, value='arthur-editor').send_keys(pirture_name)
                                 print('图片: ' + pirture_name + ' 已上传')
             else:

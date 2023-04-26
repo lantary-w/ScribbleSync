@@ -26,7 +26,7 @@ def read_config():
 
 
 @click.command()
-@click.option('--file', '-f', help='The file you want to post.', default='F:\\Projcet\\自主项目\\ScribbleSync\\test\\test.md')
+@click.option('--file', '-f', help='The file you want to post.', default='F:\\Projcet\\blog\\Blog_source\\博客文章\\简书\\23.04.16_高通量测序的数据处理与分析指北(二).md')
 def main(file):
     config = read_config()
 
